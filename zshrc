@@ -47,6 +47,8 @@ alias la='ls /dev |grep ttyACM'
 alias lu='ls /dev |grep ttyUSB'
 # alias lbroker="mosquitto_sub -v -t '#' -h 192.168.1.237 -p 1883"
 alias lps="cd ~/Documents && gedit pass.txt"
+alias english="cd ~/Documents && gedit vocabulary.txt"
+
 
 alias python=/usr/bin/python3
 alias vpl='pip freeze --local'
@@ -70,6 +72,8 @@ alias gsls='git ls-files --stage | grep ^160000'
 alias gsst='git submodule status'
 alias gsupdate_remote='git submodule update --init --recursive --remote'
 alias gsreset_hard_all='git submodule foreach git reset --hard'
+alias rviz='ros2 run rviz2 rviz2'
+
 
 # ROS
 alias ros="ros2"
@@ -89,7 +93,8 @@ _permision () { sudo chmod +x "$@" && sudo chmod 777 "$@" ;}
 _gcc() { g++ -o output "$@" && ./output && rm output;}
 _remove() { sudo rm -rf "$@" ;}
 _vpn() {sudo systemctl "$@" openvpn-server@server;}
-_port() {sudo netstat -ap | grep :"$@";}
+_kport() {sudo fuser -k -n tcp "$@";}
+_port() {sudo  sudo fuser "$@"/tcp;}
 
 _ip() { dig -"$@" TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}' ;}
 expose() { cloudflared tunnel --url http://localhost:"$@" ;}
@@ -107,11 +112,10 @@ export ROS_SETING="/opt/ros/humble"
 export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}][{line_number}]: {message}"
 # export ROS_LOG_DIR=~/my_logs
 
-export ROS_DOMAIN_ID=0
-export ROS_LOCALHOST_ONLY=0
+export ROS_DOMAIN_ID=2
+export ROS_LOCALHOST_ONLY=2
 
-
-export WS="robot_ws"
+export WS="ws"
 export ROS_WS="$HOME/$WS"
 export _colcon_cd_root=${ROS_WS}
 # export _colcon_cd_root=~/ws_learn
@@ -125,13 +129,14 @@ export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # export AMENT_PREFIX_PATH=''
 # export CMAKE_PREFIX_PATH='' 
 # export COLCON_PREFIX_PATH=''
-# export ROS_DISTRO=galactic && \
+# export ROS_DISTRO=humble && \
 # export GAZEBO_MODEL_PATH=`ros pkg prefix turtlebot3_gazebo`/share/turtlebot3_gazebo/models/ && \
 
 # SIMULATION TURTELBOT
 export TURTLEBOT3_MODEL=burger
 # export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/${ROS_DISTRO}/share/turtlebot3_gazebo/models/
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${ROS_WS}/src/turtlebot3_gazebo/models/
+export PYTHONDONTWRITEBYTECODE=1
 
 
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.zsh
