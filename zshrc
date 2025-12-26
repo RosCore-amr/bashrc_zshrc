@@ -31,10 +31,90 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-# Custom
+# PATH AND SOURCE
+# PATH=/bin:/usr/bin:/usr/local/bin:${PATH}
+export PATH="$HOME/.local/bin:$PATH"
+export PATH
+export ROS_HOSTNAME=localhost
+export ROS_MASTER_URI=http://localhost:11311
+export ROS_SETING="/opt/ros/jazzy"
+export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}][{line_number}]: {message}"
+# export ROS_LOG_DIR=~/my_logs
+
+# export ROS_DOMAIN_ID=2
+# export ROS_LOCALHOST_ONLY=2
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+# export ROS_STATIC_PEERS=192.168.1.10,192.168.1.11
+
+
+export WS="ws"
+export ROS_WS="$HOME/$WS"
+export _colcon_cd_root=${ROS_WS}
+# export _colcon_cd_root=~/ws_learn
+
+# export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+# export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+# export CC="/usr/lib/ccache/gcc"
+# export CXX="/usr/lib/ccache/g++"
+# export CXX=clang++
+# export CC=clang
+# export AMENT_PREFIX_PATH=''
+# export CMAKE_PREFIX_PATH='' 
+# export COLCON_PREFIX_PATH=''
+# export ROS_DISTRO=jazzy && \
+# export GAZEBO_MODEL_PATH=`ros pkg prefix turtlebot3_gazebo`/share/turtlebot3_gazebo/models/ && \
+
+# SIMULATION TURTELBOT
+export TURTLEBOT3_MODEL=burger
+# export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/${ROS_DISTRO}/share/turtlebot3_gazebo/models/
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${ROS_WS}/src/turtlebot3_gazebo/models/
+export PYTHONDONTWRITEBYTECODE=1
+
+
+
+source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.zsh
+source /usr/share/colcon_cd/function/colcon_cd.sh
+source ${ROS_WS}/install/setup.zsh
+source ${ROS_WS}/install/local_setup.zsh
+source ${ROS_SETING}/setup.zsh
+# source /usr/share/gazebo/setup.sh
+
+# EVAL
+eval "$(register-python-argcomplete ros2)"
+eval "$(register-python-argcomplete colcon)"
+eval "$(register-python-argcomplete colcon_cd)"
+
+
+# SHORTCUT COMMAND
+cmo() { cd $ROS_WS && colcon build --symlink-install --packages-select "$@" ;}
+cmdp() {cd $ROS_WS && colcon build --packages-up-to "$@" ;}
+_permision () { sudo chmod +x "$@" && sudo chmod 777 "$@" ;}
+_gcc() { g++ -o output "$@" && ./output && rm output;}
+_remove() { sudo rm -rf "$@" ;}
+_vpn() {sudo systemctl "$@" openvpn-server@server;}
+_kport() {sudo fuser -k -n tcp "$@";}
+_port() {sudo  sudo fuser "$@"/tcp;}
+_pip() {pip install "$@" --break-system-packages;}
+
+_ip() { dig -"$@" TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}' ;}
+expose() { cloudflared tunnel --url http://localhost:"$@" ;}
+
+rtopic() {ros2 run risk_management echo_topic "$@";}
+_rtopic() {
+    local topics
+    topics=(${(f)"$(ros2 topic list 2>/dev/null)"})
+    _describe 'ros2 topics' topics
+}
+compdef _rtopic rtopic
+# compdef rtopic='ros2 topic echo'
+
+rospy_pack() { ros2 pkg create --build-type ament_python "$@" --dependencies rclpy ;}
+roscpp_pack() { ros2 pkg create --build-type ament_cmake "$@" --dependencies rclcpp ;}
+
+
+# ALIAS
 alias _source="source ~/.zshrc"
 alias sysboost=" sudo apt update && sudo apt upgrade -y && sudo apt-get update && sudo apt-get upgrade -y && sudo aptitude safe-upgrade -y "
-
 alias ip_="ifconfig | awk '/inet 192.168./ {print $2}'"
 
 # LIST
@@ -74,7 +154,6 @@ alias gsupdate_remote='git submodule update --init --recursive --remote'
 alias gsreset_hard_all='git submodule foreach git reset --hard'
 alias rviz='ros2 run rviz2 rviz2'
 
-
 # ROS
 alias ros="ros2"
 alias cm='cd $ROS_WS && colcon build --symlink-install'
@@ -87,68 +166,5 @@ alias killros="cd ~/Documents && ./kill_ros_nodes.sh "
 alias tf='ros2 run tf2_tools view_frames && evince frames.pdf &'
 alias clrpath="export AMENT_PREFIX_PATH='' && export CMAKE_PREFIX_PATH='' && export COLCON_PREFIX_PATH=''"
 
-cmo() { cd $ROS_WS && colcon build --symlink-install --packages-select "$@" ;}
-cmdp() {cd $ROS_WS && colcon build --packages-up-to "$@" ;}
-_permision () { sudo chmod +x "$@" && sudo chmod 777 "$@" ;}
-_gcc() { g++ -o output "$@" && ./output && rm output;}
-_remove() { sudo rm -rf "$@" ;}
-_vpn() {sudo systemctl "$@" openvpn-server@server;}
-_kport() {sudo fuser -k -n tcp "$@";}
-_port() {sudo  sudo fuser "$@"/tcp;}
-
-_ip() { dig -"$@" TXT +short o-o.myaddr.l.google.com @ns1.google.com | awk -F'"' '{ print $2}' ;}
-expose() { cloudflared tunnel --url http://localhost:"$@" ;}
-
-
-rospy_pack() { ros2 pkg create --build-type ament_python "$@" --dependencies rclpy ;}
-roscpp_pack() { ros2 pkg create --build-type ament_cmake "$@" --dependencies rclcpp ;}
-
-# PATH AND SOURCE
-PATH=/bin:/usr/bin:/usr/local/bin:${PATH}
-export PATH
-export ROS_HOSTNAME=localhost
-export ROS_MASTER_URI=http://localhost:11311
-export ROS_SETING="/opt/ros/humble"
-export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}][{line_number}]: {message}"
-# export ROS_LOG_DIR=~/my_logs
-
-export ROS_DOMAIN_ID=2
-export ROS_LOCALHOST_ONLY=2
-
-export WS="ws"
-export ROS_WS="$HOME/$WS"
-export _colcon_cd_root=${ROS_WS}
-# export _colcon_cd_root=~/ws_learn
-
-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-# export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-# export CC="/usr/lib/ccache/gcc"
-# export CXX="/usr/lib/ccache/g++"
-# export CXX=clang++
-# export CC=clang
-# export AMENT_PREFIX_PATH=''
-# export CMAKE_PREFIX_PATH='' 
-# export COLCON_PREFIX_PATH=''
-# export ROS_DISTRO=humble && \
-# export GAZEBO_MODEL_PATH=`ros pkg prefix turtlebot3_gazebo`/share/turtlebot3_gazebo/models/ && \
-
-# SIMULATION TURTELBOT
-export TURTLEBOT3_MODEL=burger
-# export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/${ROS_DISTRO}/share/turtlebot3_gazebo/models/
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${ROS_WS}/src/turtlebot3_gazebo/models/
-export PYTHONDONTWRITEBYTECODE=1
-
-
-source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.zsh
-source /usr/share/colcon_cd/function/colcon_cd.sh
-source ${ROS_WS}/install/setup.zsh
-source ${ROS_WS}/install/local_setup.zsh
-source ${ROS_SETING}/setup.zsh
-# source /usr/share/gazebo/setup.sh
-
-
-eval "$(register-python-argcomplete3 ros2)"
-eval "$(register-python-argcomplete3 colcon)"
-eval "$(register-python-argcomplete3 colcon_cd)"
 # eval "pip completion --zsh"
 xset r on
